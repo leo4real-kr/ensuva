@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>나의 끝나지 않는 여름방학</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ════ 오프닝 ════ -->
+<div id="o-title">
+  <img src="img/title.png" alt="타이틀">
+  <div class="click-to-start">시작하려면 클릭하세요</div>
+  <div class="ai-notice">
+    <p>This game features AI-generated content.</p>
+    <p>본 게임은 AI 기술을 활용하여 제작되었습니다.</p>
+  </div>
+</div>
+
+<div id="o-gender" class="o-screen">
+  <div class="o-title-text">나의 끝나지 않는 여름방학</div>
+  <div class="o-subtitle">당신은 누구인가요</div>
+  <div class="btn-row">
+    <button class="choice-btn" onclick="selectGender('m')">남성</button>
+    <button class="choice-btn" onclick="selectGender('f')">여성</button>
+  </div>
+</div>
+
+<div id="o-name" class="o-screen">
+  <div class="o-title-text">이름을 알려주세요</div>
+  <div class="name-row">
+    <div class="name-field">
+      <div class="name-field-label">성</div>
+      <input type="text" class="name-input" id="input-last" maxlength="2" placeholder="성" autocomplete="off">    </div>
+    <div class="name-field">
+      <div class="name-field-label">이름</div>
+      <input type="text" class="name-input" id="input-first" maxlength="4" placeholder="이름" autocomplete="off">
+    </div>
+  </div>
+  <div class="name-preview" id="name-preview">　</div>
+  <button class="confirm-btn" onclick="confirmName()">다음</button>
+</div>
+
+<div id="o-nickname" class="o-screen">
+  <div class="o-title-text">마을 사람들이 뭐라고 부를까요</div>
+  <div class="o-subtitle">각각 하나씩 골라주세요</div>
+  <div class="nick-section">
+    <div class="nick-section-label">첫 번째 호칭</div>
+    <div class="nick-btns" id="nick1-btns"></div>
+  </div>
+  <div class="o-divider"></div>
+  <div class="nick-section">
+    <div class="nick-section-label">두 번째 호칭</div>
+    <div class="nick-btns" id="nick2-btns">
+      <button class="nick-btn" onclick="selectNick(2,'학생')">학생</button>
+      <button class="nick-btn" onclick="selectNick(2,'선생')">선생</button>
+      <button class="nick-btn" onclick="selectNick(2,'사장')">사장</button>
+      <button class="nick-btn" onclick="selectNick(2,'저기')">저기</button>
+      <button class="nick-btn" onclick="selectNick(2,'거시기')">거시기</button>
+    </div>
+  </div>
+  <button class="confirm-btn" id="nick-confirm" disabled onclick="confirmNickname()">시작하기</button>
+</div>
+
+<div id="o-cutscene">
+  <div id="cut-fade"></div>
+  <div id="cut-indicator"></div>
+  <img class="cut-img" id="cut-01" src="" alt="">
+  <img class="cut-img" id="cut-02" src="" alt="">
+  <img class="cut-img" id="cut-03" src="img/opening_03.png" alt="">
+  <img class="cut-img" id="cut-04" src="" alt="">
+  <img class="cut-img" id="cut-05" src="" alt="">
+  <img class="cut-img" id="cut-06" src="" alt="">
+  <div id="cut-text-box">
+    <div id="cut-narrator"></div>
+    <div class="cut-hint">화면을 터치하여 계속</div>
+  </div>
+</div>
+
+<!-- ════ 메인 게임 ════ -->
+<div id="game">
+
+  <!-- 배경 씬 (마을 + 강 이미지 모두) -->
+  <div id="scene">
+    <div id="time-overlay"></div>
+    <!-- 마을 배경 -->
+    <img class="scene-img" id="bg-village-1" src="img/bg_village_1.png" alt="">
+    <img class="scene-img" id="bg-village-2" src="img/bg_village_2.png" alt="">
+    <img class="scene-img" id="bg-village-3" src="img/bg_village_3.png" alt="">
+    <img class="scene-img" id="bg-village-4" src="img/bg_village_4.png" alt="">
+    <img class="scene-img" id="bg-village-5" src="img/bg_village_5.png" alt="">
+    <!-- 강 배경 -->
+    <img class="scene-img" id="bg-river-1" src="img/bg_river_1.png" alt="">
+    <img class="scene-img" id="bg-river-2" src="img/bg_river_2.png" alt="">
+    <img class="scene-img" id="bg-river-3" src="img/bg_river_3.png" alt="">
+    <img class="scene-img" id="bg-river-4" src="img/bg_river_4.png" alt="">
+    <img class="scene-img" id="bg-river-5" src="img/bg_river_5.png" alt="">
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-left">
+      <div class="hud-date" id="hud-date">백수 1일째</div>
+      <div class="hud-time" id="hud-time">오후 2:00</div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-money-label">₩</div>
+      <div class="hud-money" id="hud-money">0</div>
+    </div>
+  </div>
+
+  <button id="sound-btn" onclick="toggleSound()">🔊</button>
+
+  <!-- 독백 -->
+  <div id="monologue"><p id="monologue-text"></p></div>
+
+  <!-- 낚시 캔버스 -->
+  <canvas id="fishing-canvas"></canvas>
+
+  <!-- 낚시 UI -->
+  <div id="fishing-ui">
+    <div id="fishing-msg">버튼을 길게 눌러 캐스팅</div>
+    <button id="cast-start-btn"
+      ontouchstart="onCastStart()" ontouchend="onCastRelease()"
+      onmousedown="onCastStart()"  onmouseup="onCastRelease()">
+      <span class="cast-btn-icon">🎣</span>
+      <span>캐스팅</span>
+    </button>
+    <div id="reel-controls">
+      <button class="rhythm-tap-btn"
+        ontouchstart="onRhythmTap()"
+        onclick="onRhythmTap()">
+        탭 !
+      </button>
+    </div>
+  </div>
+
+  <!-- 낚시 결과 -->
+  <div id="fishing-result">
+    <div class="result-fish-emoji" id="result-emoji">🎣</div>
+    <div id="result-name"></div>
+    <div id="result-weight"></div>
+    <div class="result-btns" id="result-action-btns">
+      <button class="result-btn" onclick="keepFish()">보관</button>
+      <button class="result-btn" onclick="releaseFish()">방생 ★</button>
+    </div>
+    <div id="result-miss" style="display:none">아무것도 잡지 못했다.</div>
+    <div class="result-btns" style="margin-top:8px">
+      <button class="result-btn" onclick="retryFishing()">재시도 (30분)</button>
+      <button class="result-btn" onclick="returnFromFishing()">돌아가기</button>
+    </div>
+  </div>
+
+  <!-- 낚시 중 하단 버튼 -->
+  <div id="fishing-bottom-btns" style="display:none">
+    <button class="fishing-bottom-btn" onclick="retryFishing()">재시도</button>
+    <button class="fishing-bottom-btn" onclick="returnFromFishing()">돌아가기</button>
+  </div>
+
+  <!-- ── 씬: 마을 ── -->
+  <div class="scene-panel" id="scene-village">
+    <!-- 마을 콘텐츠 (탭으로 전환) -->
+    <div class="village-panel active" id="vpanel-shop">
+      <div class="coming-soon">상점 — 준비중</div>
+    </div>
+    <div class="village-panel" id="vpanel-restaurant">
+      <div class="coming-soon">식당 — 준비중</div>
+    </div>
+    <div class="village-panel" id="vpanel-home">
+      <div class="coming-soon">집 — 준비중</div>
+    </div>
+  </div>
+
+  <!-- ── 씬: 강 행동 선택 ── -->
+  <div class="scene-panel" id="scene-river-select">
+    <div class="river-select-title">강가에 서 있다</div>
+    <div class="river-action-cards">
+      <div class="river-action-card" onclick="doRiverView()">
+        <div class="card-icon">🌊</div>
+        <div class="card-label">강구경</div>
+        <div class="card-time">30분 / 10초</div>
+      </div>
+      <div class="river-action-card" onclick="doRiverFishing()">
+        <div class="card-icon">🎣</div>
+        <div class="card-label">낚시</div>
+        <div class="card-time">30분</div>
+      </div>
+      <div class="river-action-card" onclick="returnToVillage()">
+        <div class="card-icon">🏘️</div>
+        <div class="card-label">마을로</div>
+        <div class="card-time">30분</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 씬: 강구경 ── -->
+  <div class="scene-panel" id="scene-river-view">
+    <div id="river-view">
+      <div class="ripple-container">
+        <div class="ripple"></div>
+        <div class="ripple"></div>
+        <div class="ripple"></div>
+      </div>
+      <div class="river-label">그냥 바라보는 것도 괜찮다</div>
+    </div>
+    <div class="river-view-back">
+      <button class="back-btn" onclick="stopRiverView()">돌아가기</button>
+    </div>
+  </div>
+
+  <!-- ── 씬: 강 낚시 ── -->
+  <div class="scene-panel" id="scene-river-fishing"></div>
+
+  <!-- ── 마을 하단 탭 ── -->
+  <div id="village-tabs">
+    <div class="village-tab active" onclick="setVillageTab('shop', event)">
+      <img class="tab-icon" src="img/icon_shop.png" alt="상점">
+      <div class="tab-name">상점</div>
+    </div>
+    <div class="village-tab" onclick="setVillageTab('restaurant', event)">
+      <img class="tab-icon" src="img/icon_restaurant.png" alt="식당">
+      <div class="tab-name">식당</div>
+    </div>
+    <div class="village-tab" onclick="setVillageTab('home', event)">
+      <img class="tab-icon" src="img/icon_home.png" alt="집">
+      <div class="tab-name">집</div>
+    </div>
+    <div class="village-tab go-river" onclick="goToRiver()">
+      <img class="tab-icon" src="img/icon_river.png" alt="강">
+      <div class="tab-name">강으로</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/player.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/game.js"></script>
+<script src="js/opening.js"></script>
+<script src="js/fishing.js"></script>
+<script>
+  // 낚시 결과 후 재시도/돌아가기 연결
+  const _origShowResult = showFishingResult;
+  showFishingResult = function(success, fish, weight) {
+    _origShowResult(success, fish, weight);
+    document.getElementById('fishing-bottom-btns').style.display = 'none';
+  };
+
+  const _origCloseFishing = closeFishingResult;
+  closeFishingResult = function(msg) {
+    _origCloseFishing(msg);
+    document.getElementById('fishing-bottom-btns').style.display = 'flex';
+    document.getElementById('cast-start-btn').style.display = 'none';
+  };
+</script>
+</body>
+</html>

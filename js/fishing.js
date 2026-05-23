@@ -32,8 +32,8 @@ const casting = { power: 0, charging: false };
 // ── 릴링 (게이지 방식) ──
 const reeling = {
   gauge: 0,
-  decayRate: 0.0003,  // 매우 느린 감소 — 탭할 시간 충분히 확보
-  tapBoost: 0.22,
+  decayRate: 0.0003,  // 기본값 (물고기별로 덮어씌워짐)
+  tapBoost: 0.22,     // 기본값 (물고기별로 덮어씌워짐)
   missCount: 0,
   maxMiss: 0,
 };
@@ -47,17 +47,29 @@ const rhythm = {
 };
 
 // ── 물고기 DB ──
+// zones: 판정 구간 수
+// size: 구간 크기 (클수록 맞추기 쉬움)
+// speed: 마커 회전 속도
+// hits: 목표 성공 횟수
+// maxMiss: 허용 실패 횟수
+// tapBoost: 탭 1회 게이지 증가량
+// decayRate: 프레임당 게이지 감소량
 const fishDB = [
   { name:'피라미', rarity:'common', emoji:'🐠', weight:[20,100],   price:300,
-    pattern:{ zones:1, size:0.55, speed:0.018, maxMiss:3 } },
+    pattern:{ zones:1, size:0.60, speed:0.016, hits:2, maxMiss:3,
+              tapBoost:0.28, decayRate:0.0002 } },
   { name:'붕어',   rarity:'common', emoji:'🐟', weight:[100,400],  price:500,
-    pattern:{ zones:2, size:0.42, speed:0.024, maxMiss:3 } },
+    pattern:{ zones:2, size:0.44, speed:0.022, hits:3, maxMiss:3,
+              tapBoost:0.22, decayRate:0.0003 } },
   { name:'쏘가리', rarity:'rare',   emoji:'🐡', weight:[200,800],  price:1200,
-    pattern:{ zones:2, size:0.28, speed:0.036, maxMiss:2 } },
+    pattern:{ zones:2, size:0.30, speed:0.034, hits:4, maxMiss:2,
+              tapBoost:0.18, decayRate:0.0004 } },
   { name:'메기',   rarity:'rare',   emoji:'🐟', weight:[300,1500], price:1500,
-    pattern:{ zones:3, size:0.32, speed:0.030, maxMiss:2 } },
+    pattern:{ zones:3, size:0.32, speed:0.028, hits:5, maxMiss:2,
+              tapBoost:0.16, decayRate:0.0004 } },
   { name:'가물치', rarity:'epic',   emoji:'🐍', weight:[500,3000], price:5000,
-    pattern:{ zones:4, size:0.22, speed:0.044, maxMiss:1 } },
+    pattern:{ zones:4, size:0.22, speed:0.040, hits:7, maxMiss:1,
+              tapBoost:0.12, decayRate:0.0005 } },
 ];
 
 let currentFish = null;
@@ -135,8 +147,10 @@ function onCastRelease() {
 
   const power = Math.max(0.2, casting.power);
   const isPortrait = canvas.height > canvas.width;
-  bobber.targetX = canvas.width  * (isPortrait ? 0.20 : 0.25) + canvas.width * 0.50 * power;
-  bobber.targetY = canvas.height * (isPortrait ? 0.35 : 0.45) + canvas.height * (1 - power) * 0.08;
+
+  // 찌는 항상 오른쪽 아래 방향으로 (강이 오른쪽)
+  bobber.targetX = canvas.width  * (isPortrait ? 0.45 : 0.40) + canvas.width * 0.35 * power;
+  bobber.targetY = canvas.height * (isPortrait ? 0.52 : 0.42) + canvas.height * 0.08 * (1 - power);
   bobber.x = canvas.width  * 0.60;
   bobber.y = canvas.height * (isPortrait ? 0.55 : 0.18);
 
@@ -259,10 +273,12 @@ function onStrike() {
     rhythm.zones.push({ start: center - p.size/2, end: center + p.size/2 });
   }
 
-  // 게이지 설정
-  reeling.gauge    = 0.15;
+  // 게이지 + 물고기별 파라미터 적용
+  reeling.gauge     = 0.10;
   reeling.missCount = 0;
-  reeling.maxMiss  = p.maxMiss;
+  reeling.maxMiss   = p.maxMiss;
+  reeling.tapBoost  = p.tapBoost;
+  reeling.decayRate = p.decayRate;
 
   // UI: 릴링 컨트롤 표시 (탭 버튼)
   document.getElementById('reel-controls').style.display = 'flex';

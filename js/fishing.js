@@ -82,8 +82,9 @@ function resizeCanvas() {
 
 function resetBobber() {
   if (!canvas) return;
-  bobber.x = canvas.width  * 0.15;
-  bobber.y = canvas.height * 0.80;
+  const isPortrait = canvas.height > canvas.width;
+  bobber.x = canvas.width  * 0.50;
+  bobber.y = canvas.height * (isPortrait ? 0.85 : 0.80);
   bobber.sinkAmount = 0;
   bobber.floatY = 0;
   bobber.ripples = [];
@@ -133,10 +134,11 @@ function onCastRelease() {
   hideCastBtn();
 
   const power = Math.max(0.2, casting.power);
-  bobber.targetX = canvas.width  * 0.25 + canvas.width  * 0.50 * power;
-  bobber.targetY = canvas.height * (0.45 + (1 - power) * 0.08);
-  bobber.x = canvas.width  * 0.60;   // 낚싯대 끝에서 출발
-  bobber.y = canvas.height * 0.18;
+  const isPortrait = canvas.height > canvas.width;
+  bobber.targetX = canvas.width  * (isPortrait ? 0.20 : 0.25) + canvas.width * 0.50 * power;
+  bobber.targetY = canvas.height * (isPortrait ? 0.35 : 0.45) + canvas.height * (1 - power) * 0.08;
+  bobber.x = canvas.width  * 0.60;
+  bobber.y = canvas.height * (isPortrait ? 0.55 : 0.18);
 
   setFishingMsg('');
   animateCast(() => {
@@ -442,11 +444,12 @@ function fishingLoop() {
   animFrame = requestAnimationFrame(fishingLoop);
 }
 
-// ── 리듬 원형 UI (캔버스 상단) ──
+// ── 리듬 원형 UI ──
 function drawRhythmCircle() {
+  const isPortrait = canvas.height > canvas.width;
   const cx = canvas.width  * 0.5;
-  const cy = canvas.height * 0.30;
-  const R  = Math.min(canvas.width, canvas.height) * 0.14;
+  const cy = canvas.height * (isPortrait ? 0.25 : 0.30);
+  const R  = Math.min(canvas.width, canvas.height) * (isPortrait ? 0.18 : 0.14);
 
   // 외곽
   ctx.beginPath();
@@ -509,10 +512,11 @@ function drawRhythmCircle() {
 
 // ── 게이지 (하단 바) ──
 function drawGauge() {
-  const gw = canvas.width  * 0.55;
+  const isPortrait = canvas.height > canvas.width;
+  const gw = canvas.width  * (isPortrait ? 0.65 : 0.55);
   const gh = 16;
   const gx = (canvas.width - gw) / 2;
-  const gy = canvas.height * 0.50;
+  const gy = canvas.height * (isPortrait ? 0.47 : 0.50);
 
   // 배경
   ctx.fillStyle = 'rgba(10,8,4,0.65)';
@@ -534,22 +538,24 @@ function drawGauge() {
 // ── 낚싯대 ──
 function drawRod() {
   if (!ctx || !canvas) return;
-  const rx   = canvas.width  * 0.45;   // 중앙 약간 왼쪽
-  const ry   = canvas.height * 0.92;   // 하단
-  const tipX = canvas.width  * 0.60;   // 오른쪽 위로 뻗음
-  const tipY = canvas.height * 0.18;
+  const isPortrait = canvas.height > canvas.width;
+
+  // 세로: 하단 중앙, 가로: 좌측 하단
+  const rx   = canvas.width  * (isPortrait ? 0.40 : 0.45);
+  const ry   = canvas.height * (isPortrait ? 0.95 : 0.92);
+  const tipX = canvas.width  * (isPortrait ? 0.60 : 0.60);
+  const tipY = canvas.height * (isPortrait ? 0.55 : 0.18);
 
   ctx.beginPath();
   ctx.moveTo(rx, ry);
-  ctx.quadraticCurveTo(rx + 40, ry - 80, tipX, tipY);
+  ctx.quadraticCurveTo(rx + 30, ry - 60, tipX, tipY);
   ctx.strokeStyle = '#5a3a14';
   ctx.lineWidth = 4;
   ctx.lineCap = 'round';
   ctx.stroke();
 
-  // 릴
   ctx.beginPath();
-  ctx.arc(rx + 18, ry - 35, 9, 0, Math.PI * 2);
+  ctx.arc(rx + 14, ry - 30, 9, 0, Math.PI * 2);
   ctx.fillStyle = '#7a5a30';
   ctx.fill();
   ctx.strokeStyle = '#4a3010';
@@ -560,8 +566,9 @@ function drawRod() {
 // ── 낚싯줄 ──
 function drawLine() {
   if (!ctx||!canvas) return;
-  const tx = canvas.width  * 0.60;  // 낚싯대 끝
-  const ty = canvas.height * 0.18;
+  const isPortrait = canvas.height > canvas.width;
+  const tx = canvas.width  * 0.60;
+  const ty = canvas.height * (isPortrait ? 0.55 : 0.18);
   const active=[FishingState.WAITING,FishingState.BITE,
                 FishingState.STRIKE,FishingState.REELING].includes(fishingPhase);
   const bx=active?bobber.targetX:bobber.x;

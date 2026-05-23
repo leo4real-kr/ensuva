@@ -9,6 +9,14 @@
 </head>
 <body>
 
+<!-- 가로 회전 안내 -->
+<div id="rotate-screen">
+  <div class="rotate-icon">📱</div>
+  <div class="rotate-text">
+    세로로 돌려주세요
+  </div>
+</div>
+
 <!-- ════ 오프닝 ════ -->
 <div id="o-title">
   <img src="img/title.png" alt="타이틀">
@@ -241,19 +249,20 @@
 <script src="js/opening.js"></script>
 <script src="js/fishing.js"></script>
 <script>
-  // 낚시 결과 후 재시도/돌아가기 연결
-  const _origShowResult = showFishingResult;
-  showFishingResult = function(success, fish, weight) {
-    _origShowResult(success, fish, weight);
-    document.getElementById('fishing-bottom-btns').style.display = 'none';
-  };
+  // ── 화면 방향 감지 ──
+  function checkOrientation() {
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const rotateEl = document.getElementById('rotate-screen');
+    if (rotateEl) {
+      rotateEl.style.display = isPortrait ? 'none' : 'flex';
+    }
+  }
 
-  const _origCloseFishing = closeFishingResult;
-  closeFishingResult = function(msg) {
-    _origCloseFishing(msg);
-    document.getElementById('fishing-bottom-btns').style.display = 'flex';
-    document.getElementById('cast-start-btn').style.display = 'none';
-  };
+  checkOrientation();
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(checkOrientation, 300);
+  });
 </script>
 </body>
 </html>

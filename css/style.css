@@ -667,3 +667,165 @@ body {
   border-color: var(--amber-light);
   transform: scale(0.93);
 }
+
+/* ════════════════════════════════
+   세로화면 전용
+════════════════════════════════ */
+
+/* 가로 회전 시 안내 화면 */
+#rotate-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0804;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.rotate-icon {
+  font-size: 64px;
+  animation: rotate-hint 2s ease-in-out infinite;
+}
+
+@keyframes rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(-90deg); }
+}
+
+.rotate-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: var(--text-sub);
+  text-align: center;
+}
+
+/* 가로 모드일 때 안내 표시 */
+@media (orientation: landscape) and (max-height: 500px) {
+  #rotate-screen { display: flex; }
+  #game, .o-screen, #o-title, #o-cutscene { pointer-events: none; }
+}
+
+/* 세로 모드 최적화 */
+@media (orientation: portrait) {
+
+  /* 배경 이미지 세로 기준 */
+  .scene-img {
+    width: auto;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* 오프닝 컷씬 이미지 */
+  .cut-img {
+    width: auto;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* HUD 세로 조정 */
+  #hud {
+    padding: clamp(12px,3vh,20px) clamp(16px,5vw,28px);
+  }
+
+  /* 탭 아이콘 세로에서 더 크게 */
+  .village-tab .tab-icon,
+  .tab-icon {
+    width: clamp(32px,7vw,48px);
+    height: clamp(32px,7vw,48px);
+  }
+
+  .village-tab .tab-name,
+  .tab-name {
+    font-size: clamp(12px,2.5vw,16px);
+  }
+
+  /* 강 행동 선택 카드 세로 배치 */
+  .river-action-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(12px,2.5vh,20px);
+  }
+
+  .river-action-card {
+    width: clamp(200px,70vw,300px);
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: clamp(14px,2.5vh,20px) clamp(20px,5vw,32px);
+    gap: 20px;
+  }
+
+  .river-action-card .card-icon { font-size: clamp(28px,6vw,40px); }
+  .river-action-card .card-label { font-size: clamp(15px,3vw,19px); }
+  .river-action-card .card-time { font-size: clamp(11px,2vw,14px); }
+
+  /* 오프닝 텍스트 박스 세로 조정 */
+  #cut-text-box {
+    padding: clamp(20px,3vh,32px) clamp(20px,5vw,40px) clamp(24px,4vh,44px);
+  }
+
+  #cut-narrator {
+    font-size: clamp(15px,3.5vw,22px);
+  }
+
+  /* 낚시 메시지 */
+  #fishing-msg {
+    font-size: clamp(14px,3.5vw,20px);
+  }
+
+  /* 릴링 탭 버튼 세로에서 더 크게 */
+  .rhythm-tap-btn {
+    width: clamp(130px,32vw,200px);
+    height: clamp(130px,32vw,200px);
+    font-size: clamp(22px,5.5vw,36px);
+  }
+
+  /* 결과 화면 */
+  .result-fish-emoji { font-size: clamp(56px,14vw,90px); }
+  #result-name { font-size: clamp(24px,6vw,36px); }
+  .result-btn {
+    min-width: clamp(90px,24vw,140px);
+    font-size: clamp(13px,3vw,17px);
+  }
+
+  /* 강구경 텍스트 */
+  .river-label {
+    font-size: clamp(13px,3vw,18px);
+    letter-spacing: 0.4em;
+  }
+
+  /* 독백 */
+  #monologue p {
+    font-size: clamp(15px,3.5vw,20px);
+  }
+
+  /* 이름 입력 */
+  .name-input { font-size: clamp(26px,6vw,36px); }
+  #input-last  { width: clamp(70px,18vw,110px); }
+  #input-first { width: clamp(140px,38vw,220px); }
+
+  /* 호칭 버튼 */
+  .nick-btn {
+    min-width: clamp(70px,18vw,110px);
+    height: clamp(48px,8vh,64px);
+    font-size: clamp(14px,3.5vw,19px);
+  }
+
+  /* 성별 버튼 */
+  .choice-btn {
+    min-width: clamp(120px,36vw,180px);
+    height: clamp(56px,9vh,72px);
+    font-size: clamp(17px,4vw,23px);
+  }
+
+  /* 마을 상점/식당/집 탭 */
+  #village-tabs {
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  }
+}

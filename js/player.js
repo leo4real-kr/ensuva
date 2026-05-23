@@ -18,6 +18,9 @@ const gameState = {
   money: 0,
   muted: false,
   bgIndex: 0,
+  hp: 100,      // 체력 (0~100)
+  maxHp: 100,
+  sleptToday: false,  // 하루 1회 수면 제한
 };
 
 // ── 조사 자동 판별 ──
@@ -66,6 +69,8 @@ function saveGame() {
     hour: gameState.hour,
     minute: gameState.minute,
     money: gameState.money,
+    hp: gameState.hp,
+    sleptToday: gameState.sleptToday,
   }));
 }
 

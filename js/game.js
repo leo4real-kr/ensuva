@@ -22,7 +22,74 @@ function updateHUD() {
   document.getElementById('hud-time').textContent = `${period} ${h12}:${m}`;
   document.getElementById('hud-date').textContent = `백수 ${gameState.day}일째`;
   document.getElementById('hud-money').textContent = gameState.money.toLocaleString();
+  updateHpBar();
   updateTimeOverlay();
+}
+
+function updateHpBar() {
+  const pct = (gameState.hp / gameState.maxHp) * 100;
+  const bar = document.getElementById('hp-bar');
+  const txt = document.getElementById('hp-text');
+  if (!bar || !txt) return;
+  bar.style.width = `${pct}%`;
+  // 색상: 낮을수록 빨간쪽으로
+  bar.style.backgroundPosition = `${100 - pct}% 0`;
+  bar.classList.toggle('danger', gameState.hp <= 20);
+  txt.textContent = `❤️ ${gameState.hp}`;
+}
+
+// ── 체력 소모/회복 ──
+function loseHp(amount, reason) {
+  gameState.hp = Math.max(0, gameState.hp - amount);
+  updateHpBar();
+
+  // 체력 0 → 강제 귀가
+  if (gameState.hp <= 0) {
+    forceReturnHome();
+  }
+}
+
+function gainHp(amount, label) {
+  const prev = gameState.hp;
+  gameState.hp = Math.min(gameState.maxHp, gameState.hp + amount);
+  updateHpBar();
+  saveGame();
+
+  // 회복 알림
+  if (gameState.hp > prev) {
+    showHpNotify(`+${gameState.hp - prev} ❤️ ${label || ''}`);
+  }
+}
+
+function showHpNotify(msg) {
+  let el = document.getElementById('hp-notify');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'hp-notify';
+    el.className = 'hp-notify';
+    document.getElementById('game').appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ── 체력 0 → 강제 귀가 ──
+function forceReturnHome() {
+  // 낚시 중이면 중단
+  if (typeof fishingPhase !== 'undefined') {
+    fishingPhase = FishingState.IDLE;
+    if (typeof rhythm !== 'undefined') rhythm.active = false;
+  }
+  stopTimeFlow();
+  gameState.hp = 10; // 최소 체력으로 귀가
+  showScene(Scene.HOME);
+  // 귀가 독백은 home.js에서 처리
+  setTimeout(() => {
+    const el = document.getElementById('home-monologue');
+    if (el) el.textContent = '몸이 너무 피곤하다. 집으로 돌아왔다.';
+    renderHomeMenu();
+  }, 300);
 }
 
 function updateTimeOverlay() {
@@ -58,7 +125,8 @@ let timeInterval = null;
 function startTimeFlow() {
   if (timeInterval) return;
   timeInterval = setInterval(() => {
-    passTime(30); // 10초 실시간 = 30분
+    passTime(30);
+    loseHp(3); // 강구경 30분당 -3
   }, 10000);
 }
 
@@ -75,6 +143,13 @@ function getBgIndexByHour(hour) {
   if (hour < 18) return 3;
   if (hour < 20) return 4;
   return 5;
+}
+
+function getHomeBgByHour(hour) {
+  if (hour < 11) return 1;  // 아침
+  if (hour < 18) return 2;  // 낮
+  if (hour < 20) return 3;  // 저녁
+  return 4;                  // 밤
 }
 
 const bgSets = {
@@ -174,13 +249,13 @@ function showScene(scene) {
     case Scene.HOME:
       document.getElementById('scene-village').style.display = 'flex';
       document.getElementById('village-tabs').style.display  = 'flex';
-      // 집 배경 표시
       document.querySelectorAll('.scene-img').forEach(i => i.classList.remove('visible'));
-      const homeEl = document.getElementById('bg-home');
+      // 집 배경 시간대별 선택
+      const homeIdx = getHomeBgByHour(gameState.hour);
+      const homeEl = document.getElementById(`bg-home-${homeIdx}`);
       if (homeEl) homeEl.classList.add('visible');
       switchBGM('snd/bgm_main.mp3');
       setRiverSound(false);
-      // 집 탭 활성화
       document.querySelectorAll('.village-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('vpanel-home').classList.add('active');
@@ -210,7 +285,8 @@ function setVillageTab(tab, e) {
 
 // ── 강으로 이동 ──
 function goToRiver() {
-  passTime(30); // 이동 30분
+  loseHp(5);
+  passTime(30);
   showScene(Scene.RIVER_SELECT);
 }
 
@@ -220,12 +296,15 @@ function doRiverView() {
 }
 
 function doRiverFishing() {
+  loseHp(10);
+  passTime(30);
   showScene(Scene.RIVER_FISHING);
   startFishing();
 }
 
 function returnToVillage() {
-  passTime(30); // 귀환 30분
+  loseHp(5);
+  passTime(30);
   showScene(Scene.VILLAGE);
 }
 
@@ -237,6 +316,7 @@ function stopRiverView() {
 
 // ── 낚시 후 행동 ──
 function retryFishing() {
+  loseHp(10);
   passTime(30);
   startFishing();
 }

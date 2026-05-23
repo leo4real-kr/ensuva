@@ -1029,3 +1029,97 @@ body {
   border-color: var(--amber);
   color: var(--amber-light);
 }
+
+/* ════════════════════════════════
+   체력 스탯
+════════════════════════════════ */
+
+#hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hp-bar-wrap {
+  width: clamp(80px, 20vw, 130px);
+  height: clamp(6px, 1.2vh, 9px);
+  background: rgba(10,8,4,0.6);
+  border: 1px solid rgba(122,90,48,0.3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.hp-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #e05050, #e8a030, #60d840);
+  background-size: 200% 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease, background-position 0.5s ease;
+}
+
+.hp-text {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(10px, 1.8vw, 13px);
+  font-weight: 300;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+/* 체력 낮을 때 경고 */
+.hp-bar.danger {
+  background: #e05050;
+  animation: hp-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hp-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* 체력 회복 알림 */
+.hp-notify {
+  position: fixed;
+  top: clamp(60px, 12vh, 90px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,8,4,0.8);
+  border: 1px solid rgba(96,216,64,0.4);
+  color: #90e870;
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(13px, 2.5vw, 17px);
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  padding: 8px 20px;
+  border-radius: 4px;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.hp-notify.visible { opacity: 1; }
+
+/* ── 그냥 있기 이벤트 카드 ── */
+.hangout-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 2vh, 16px);
+  padding: clamp(20px, 4vh, 32px) clamp(16px, 4vw, 28px);
+  background: rgba(10,8,4,0.5);
+  border: 1px solid rgba(122,90,48,0.2);
+  width: 100%;
+}
+.hangout-emoji  { font-size: clamp(36px, 8vw, 52px); line-height: 1; }
+.hangout-title  { font-family:'Noto Serif KR',serif; font-size:clamp(17px,3.5vw,22px); font-weight:300; color:var(--cream); letter-spacing:0.15em; text-align:center; }
+.hangout-desc   { font-size:clamp(12px,2.2vw,15px); font-weight:300; color:var(--text-sub); letter-spacing:0.1em; text-align:center; }
+.hangout-mono   { font-family:'Noto Serif KR',serif; font-size:clamp(13px,2.5vw,17px); font-weight:300; color:rgba(240,228,204,0.65); letter-spacing:0.05em; text-align:center; line-height:1.9; padding: 0 8px; }
+.hangout-cost   { font-size:clamp(12px,2.2vw,15px); font-weight:300; color:var(--text-dim); letter-spacing:0.1em; }

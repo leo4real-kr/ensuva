@@ -4,10 +4,11 @@
 
 // ── 씬 정의 ──
 const Scene = {
-  VILLAGE:       'village',      // 마을 (기본 허브)
-  RIVER_SELECT:  'river_select', // 강 - 행동 선택
-  RIVER_VIEW:    'river_view',   // 강 - 구경 중
-  RIVER_FISHING: 'river_fishing',// 강 - 낚시 중
+  VILLAGE:       'village',
+  RIVER_SELECT:  'river_select',
+  RIVER_VIEW:    'river_view',
+  RIVER_FISHING: 'river_fishing',
+  HOME:          'home',
 };
 
 let currentScene = Scene.VILLAGE;
@@ -169,6 +170,22 @@ function showScene(scene) {
       switchBGM('snd/bgm_fishing.mp3');
       setRiverSound(true);
       break;
+
+    case Scene.HOME:
+      document.getElementById('scene-village').style.display = 'flex';
+      document.getElementById('village-tabs').style.display  = 'flex';
+      // 집 배경 표시
+      document.querySelectorAll('.scene-img').forEach(i => i.classList.remove('visible'));
+      const homeEl = document.getElementById('bg-home');
+      if (homeEl) homeEl.classList.add('visible');
+      switchBGM('snd/bgm_main.mp3');
+      setRiverSound(false);
+      // 집 탭 활성화
+      document.querySelectorAll('.village-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('vpanel-home').classList.add('active');
+      showHome();
+      break;
   }
 
   updateHUD();
@@ -182,6 +199,12 @@ function setVillageTab(tab, e) {
   document.querySelectorAll('.village-tab').forEach(t => t.classList.remove('active'));
   if (e && e.currentTarget) e.currentTarget.classList.add('active');
   document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
+
+  // 집 탭은 별도 씬으로
+  if (tab === 'home') {
+    showScene(Scene.HOME);
+    return;
+  }
   document.getElementById(`vpanel-${tab}`).classList.add('active');
 }
 

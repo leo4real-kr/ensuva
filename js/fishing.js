@@ -185,9 +185,14 @@ function animateCast(onLand) {
   requestAnimationFrame(cast);
 }
 
-// ── 회수 (WAITING 중 탭) ──
+// ── 회수 ──
 function retrieveLine() {
+  // 진행 중인 입질 타이머 전부 클리어
+  clearTimeout(biteTimer);
+  biteTimer = null;
+
   fishingPhase = FishingState.IDLE;
+  bobber.sinkAmount = 0;
   resetBobber();
   setFishingMsg('회수했다.');
   setTimeout(() => {
@@ -652,7 +657,8 @@ document.addEventListener('keydown', e=>{
     else if(fishingPhase===FishingState.CASTING) onCastRelease();
     else if(fishingPhase===FishingState.STRIKE)  onStrike();
     else if(fishingPhase===FishingState.REELING) onRhythmTap();
-    else if(fishingPhase===FishingState.WAITING) retrieveLine();
+    else if(fishingPhase===FishingState.WAITING ||
+            fishingPhase===FishingState.BITE)    retrieveLine();
   }
 });
 document.addEventListener('keyup',e=>{

@@ -174,7 +174,7 @@ const hangoutEvents = [
     time: 60, hp: -5,
   },
   {
-    title: '縁側에 앉아있기',
+    title: '마루에 앉아있기',
     emoji: '🌿',
     desc: '마루에 나란히 앉아 아무 말도 안 한다.',
     monologue: '말이 없어도 불편하지 않다. 이상하게.',

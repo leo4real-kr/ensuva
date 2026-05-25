@@ -56,8 +56,8 @@ const rhythm = {
 // decayRate: 프레임당 게이지 감소량
 const fishDB = [
   { name:'피라미', rarity:'common', emoji:'🐠', weight:[20,100],   price:300,
-    pattern:{ zones:1, size:0.60, speed:0.016, hits:2, maxMiss:3,
-              tapBoost:0.28, decayRate:0.0002 } },
+    pattern:{ zones:3, size:0.70, speed:0.014, hits:2, maxMiss:3,
+              tapBoost:0.32, decayRate:0.0001 } },
   { name:'붕어',   rarity:'common', emoji:'🐟', weight:[100,400],  price:500,
     pattern:{ zones:2, size:0.44, speed:0.022, hits:3, maxMiss:3,
               tapBoost:0.22, decayRate:0.0003 } },
@@ -140,7 +140,9 @@ function onCastStart() {
 }
 
 function onCastRelease() {
+  // CASTING 상태가 아니면 절대 실행 안 함
   if (fishingPhase !== FishingState.CASTING) return;
+  if (!casting.charging) return;
   casting.charging = false;
   fishingPhase     = FishingState.FLYING;
   hideCastBtn();
@@ -285,7 +287,8 @@ function onStrike() {
   reeling.tapBoost  = p.tapBoost;
   reeling.decayRate = p.decayRate;
 
-  // UI: 릴링 컨트롤 표시 (탭 버튼)
+  // UI: 캐스팅 버튼 완전 숨기고 릴링 컨트롤 표시
+  hideCastBtn();
   document.getElementById('reel-controls').style.display = 'flex';
   setFishingMsg(`${currentFish.emoji} ${currentFish.name}! 구간에 맞춰 탭!`);
 }
@@ -472,35 +475,54 @@ function drawRhythmCircle() {
   const cy = canvas.height * (isPortrait ? 0.25 : 0.30);
   const R  = Math.min(canvas.width, canvas.height) * (isPortrait ? 0.18 : 0.14);
 
-  // 외곽
+  // 외곽 원 (배경)
   ctx.beginPath();
-  ctx.arc(cx, cy, R, 0, Math.PI*2);
-  ctx.strokeStyle = 'rgba(240,220,170,0.25)';
-  ctx.lineWidth = 2;
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(240,220,170,0.15)';
+  ctx.lineWidth = 16;
   ctx.stroke();
 
-  // 판정 구간 (초록)
+  // 판정 구간 (밝은 초록 + 외곽 글로우)
   for (const z of rhythm.zones) {
+    // 글로우 효과
     ctx.beginPath();
     ctx.arc(cx, cy, R, z.start - Math.PI/2, z.end - Math.PI/2);
-    ctx.strokeStyle = 'rgba(100,220,80,0.75)';
-    ctx.lineWidth = 12;
+    ctx.strokeStyle = 'rgba(80,255,60,0.25)';
+    ctx.lineWidth = 24;
     ctx.stroke();
+
+    // 메인 구간
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, z.start - Math.PI/2, z.end - Math.PI/2);
+    ctx.strokeStyle = 'rgba(100,240,80,0.9)';
+    ctx.lineWidth = 14;
+    ctx.stroke();
+  }
+
+  // 마커가 판정 구간 안에 있는지 체크
+  const angle = ((rhythm.angle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+  let inZone = false;
+  for (const z of rhythm.zones) {
+    let s = ((z.start % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+    let e = ((z.end   % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+    if (s <= e ? (angle >= s && angle <= e) : (angle >= s || angle <= e)) {
+      inZone = true; break;
+    }
   }
 
   // 미스 점
   for (let i = 0; i < reeling.maxMiss; i++) {
     const da = -Math.PI/2 + (i - reeling.maxMiss/2) * 0.28;
     ctx.beginPath();
-    ctx.arc(cx + Math.cos(da)*(R+18), cy + Math.sin(da)*(R+18), 6, 0, Math.PI*2);
-    ctx.fillStyle = i < reeling.missCount ? '#e05050' : 'rgba(220,80,80,0.25)';
+    ctx.arc(cx + Math.cos(da)*(R+20), cy + Math.sin(da)*(R+20), 7, 0, Math.PI*2);
+    ctx.fillStyle = i < reeling.missCount ? '#e05050' : 'rgba(220,80,80,0.2)';
     ctx.fill();
   }
 
   // 탭 피드백 플래시
   if (tapFeedback.alpha > 0) {
     ctx.beginPath();
-    ctx.arc(cx, cy, R*1.15, 0, Math.PI*2);
+    ctx.arc(cx, cy, R*1.2, 0, Math.PI*2);
     ctx.fillStyle = tapFeedback.type === 'hit'
       ? `rgba(100,255,80,${tapFeedback.alpha * 0.35})`
       : `rgba(255,80,80,${tapFeedback.alpha * 0.35})`;
@@ -514,15 +536,24 @@ function drawRhythmCircle() {
     ctx.fillText(tapFeedback.type === 'hit' ? 'NICE!' : 'MISS', cx, cy + R*0.14);
   }
 
-  // 마커
+  // 마커 (구간 안이면 초록, 밖이면 흰색)
   const mx = cx + Math.cos(rhythm.angle - Math.PI/2) * R;
   const my = cy + Math.sin(rhythm.angle - Math.PI/2) * R;
+
+  // 마커 글로우
+  if (inZone) {
+    ctx.beginPath();
+    ctx.arc(mx, my, 18, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(100,255,80,0.3)';
+    ctx.fill();
+  }
+
   ctx.beginPath();
-  ctx.arc(mx, my, 10, 0, Math.PI*2);
-  ctx.fillStyle = '#f0e4cc';
+  ctx.arc(mx, my, 11, 0, Math.PI*2);
+  ctx.fillStyle = inZone ? '#80ff60' : '#f0e4cc';
   ctx.fill();
-  ctx.strokeStyle = '#c8922a';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = inZone ? '#40c030' : '#c8922a';
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   // 물고기 이모지
@@ -648,6 +679,15 @@ function drawCastingPower(){
   ctx.font=`${Math.round(canvas.width*0.026)}px 'Noto Sans KR'`;
   ctx.textAlign='center';ctx.fillText('손을 떼면 캐스팅!',cx,cy-12);
 }
+
+// ── 모바일 길게 누르기 차단 ──
+document.addEventListener('contextmenu', e => {
+  if (e.target.closest('#fishing-canvas') ||
+      e.target.closest('#cast-start-btn') ||
+      e.target.closest('.rhythm-tap-btn')) {
+    e.preventDefault();
+  }
+});
 
 // ── 키보드 ──
 document.addEventListener('keydown', e=>{

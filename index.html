@@ -142,8 +142,10 @@
   <div id="fishing-ui">
     <div id="fishing-msg">버튼을 길게 눌러 캐스팅</div>
     <button id="cast-start-btn"
-      ontouchstart="onCastStart()" ontouchend="onCastRelease()"
-      onmousedown="onCastStart()"  onmouseup="onCastRelease()">
+      ontouchstart="if(fishingPhase==='idle'){onCastStart();}"
+      ontouchend="if(fishingPhase==='casting'){onCastRelease();}"
+      onmousedown="if(fishingPhase==='idle'){onCastStart();}"
+      onmouseup="if(fishingPhase==='casting'){onCastRelease();}">
       <span class="cast-btn-icon">🎣</span>
       <span>캐스팅</span>
     </button>

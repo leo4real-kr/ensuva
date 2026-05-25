@@ -78,10 +78,12 @@ function doSleep() {
 
   setTimeout(() => {
     gameState.day++;
-    gameState.hour      = 8;
-    gameState.minute    = 0;
+    gameState.hour       = 8;
+    gameState.minute     = 0;
     gameState.sleptToday = false;
-    gameState.hp        = gameState.maxHp; // 완전 회복
+    gameState.hp         = gameState.maxHp;
+    snackEatenToday      = false;  // 다음날 간식 리셋
+    currentSnack         = null;   // 간식 새로 결정
     saveGame();
     updateHUD();
     updateBgByTime();
@@ -118,31 +120,43 @@ function showSleepResult(monologue) {
 
 // ── 할머니 간식 ──
 const snacks = [
-  { name: '식혜',  emoji: '🥤', hp: 10, hours: [14,15,16,17] },
-  { name: '수박',  emoji: '🍉', hp: 15, hours: [11,12,13,14,15,16,17] },
-  { name: '고구마',emoji: '🍠', hp: 10, hours: [18,19,20,21] },
-  { name: '약과',  emoji: '🍪', hp: 20, hours: null }, // 랜덤
+  { name: '식혜',   emoji: '🥤', hp: 10, hours: [14,15,16,17] },
+  { name: '수박',   emoji: '🍉', hp: 15, hours: [11,12,13,14,15,16,17] },
+  { name: '고구마', emoji: '🍠', hp: 10, hours: [18,19,20,21] },
+  { name: '약과',   emoji: '🍪', hp: 20, hours: null },
 ];
 
 let snackEatenToday = false;
+let currentSnack    = null; // 오늘 할머니가 준비한 간식 고정
 
-function getAvailableSnack() {
+function getTodaySnack() {
   if (snackEatenToday) return null;
+  if (currentSnack) return currentSnack;
+
   const h = gameState.hour;
 
-  // 약과는 30% 확률로 등장
-  if (Math.random() < 0.3) return snacks[3];
+  // 약과는 30% 확률
+  if (Math.random() < 0.3) {
+    currentSnack = snacks[3];
+    return currentSnack;
+  }
 
   // 시간대별 간식
   const available = snacks.slice(0, 3).filter(s => s.hours.includes(h));
   if (available.length === 0) return null;
-  return available[Math.floor(Math.random() * available.length)];
+  currentSnack = available[Math.floor(Math.random() * available.length)];
+  return currentSnack;
+}
+
+function getAvailableSnack() {
+  return getTodaySnack();
 }
 
 function eatSnack() {
-  const snack = getAvailableSnack();
-  if (!snack) return;
+  const snack = currentSnack;
+  if (!snack || snackEatenToday) return;
   snackEatenToday = true;
+  currentSnack    = null;
   gainHp(snack.hp, snack.name);
   passTime(15);
 

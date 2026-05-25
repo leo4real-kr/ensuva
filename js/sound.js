@@ -3,7 +3,7 @@
 // ════════════════════════════════
 
 // ── Web Audio API (강소리 끊김 없는 루프) ──
-let audioCtx = null;
+let audioCtx    = null;
 let riverBuffer = null;
 let riverSource = null;
 let riverGain   = null;
@@ -33,7 +33,7 @@ function playRiverLoop() {
   riverGain.connect(ctx.destination);
   riverSource = ctx.createBufferSource();
   riverSource.buffer = riverBuffer;
-  riverSource.loop   = true;     // Web Audio 루프 — 샘플 단위 정밀도
+  riverSource.loop   = true;
   riverSource.connect(riverGain);
   riverSource.start(0);
 }
@@ -42,20 +42,29 @@ function stopRiverLoop() {
   if (riverSource) { try { riverSource.stop(); } catch(e){} riverSource = null; }
 }
 
+// ── 강 씬 여부 확인 ──
+function isRiverScene() {
+  return typeof currentScene !== 'undefined' && (
+    currentScene === Scene.RIVER_SELECT ||
+    currentScene === Scene.RIVER_VIEW   ||
+    currentScene === Scene.RIVER_FISHING
+  );
+}
+
 // ── 일반 Audio (BGM, 새소리) ──
 const sounds = {
   birds: new Audio('snd/birds.mp3'),
-  bgm:   new Audio('snd/bgm_river.mp3'),
+  bgm:   new Audio('snd/bgm_main.mp3'),
 };
 
-sounds.bgm.loop    = true;
+sounds.bgm.loop     = true;
 sounds.birds.volume = 0.3;
 sounds.bgm.volume   = 0.25;
 
 async function startSounds() {
   if (gameState.muted) return;
-  await loadRiverBuffer();
-  playRiverLoop();
+  // 버퍼 미리 로드만 해두고 재생은 하지 않음
+  loadRiverBuffer();
   sounds.bgm.play().catch(() => {});
   scheduleBirds();
 }
@@ -85,13 +94,15 @@ function toggleSound() {
     sounds.birds.pause();
     sounds.bgm.pause();
   } else {
-    playRiverLoop();
+    // 강 씬일 때만 강소리 재생
+    if (isRiverScene()) playRiverLoop();
     sounds.bgm.play().catch(() => {});
   }
 }
 
 function switchBGM(src) {
-  if (sounds.bgm.src.endsWith(src)) return;
+  const fullSrc = new URL(src, location.href).href;
+  if (sounds.bgm.src === fullSrc) return;
   sounds.bgm.pause();
   sounds.bgm.src = src;
   if (!gameState.muted) sounds.bgm.play().catch(() => {});
@@ -102,9 +113,9 @@ function setRiverSound(on) {
     if (riverBuffer) {
       if (!riverSource) playRiverLoop();
     } else {
-      // 버퍼 아직 로드 안 됐으면 로드 후 재생
       loadRiverBuffer().then(() => {
-        if (!gameState.muted) playRiverLoop();
+        // 로드 완료 시점에 강 씬인지 재확인
+        if (!gameState.muted && isRiverScene()) playRiverLoop();
       });
     }
   } else {
@@ -112,5 +123,4 @@ function setRiverSound(on) {
   }
 }
 
-// 사운드는 startGame() 에서만 명시적으로 시작
-// (오프닝 중 무음 유지)
+// 사운드는 startGame()에서만 시작 (오프닝 무음 유지)

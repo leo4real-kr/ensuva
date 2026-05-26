@@ -162,11 +162,13 @@ let currentBgSet = 'village';
 let currentBgIdx = 1;
 
 function updateBgByTime() {
+  // 집 씬에서는 마을 배경 건드리지 않음
+  if (currentScene === Scene.HOME) return;
   const newIdx = getBgIndexByHour(gameState.hour);
   if (newIdx === currentBgIdx) return;
-  const imgs = bgSets[currentBgSet];
-  const curEl  = document.getElementById(`${currentBgSet === 'village' ? 'bg-village' : 'bg-river'}-${currentBgIdx}`);
-  const nextEl = document.getElementById(`${currentBgSet === 'village' ? 'bg-village' : 'bg-river'}-${newIdx}`);
+  const prefix = currentBgSet === 'village' ? 'bg-village' : 'bg-river';
+  const curEl  = document.getElementById(`${prefix}-${currentBgIdx}`);
+  const nextEl = document.getElementById(`${prefix}-${newIdx}`);
   if (nextEl) nextEl.classList.add('visible');
   setTimeout(() => { if (curEl) curEl.classList.remove('visible'); }, 2000);
   currentBgIdx = newIdx;
@@ -273,18 +275,21 @@ function setVillageTab(tab, e) {
   currentVillageTab = tab;
   document.querySelectorAll('.village-tab').forEach(t => t.classList.remove('active'));
   if (e && e.currentTarget) e.currentTarget.classList.add('active');
-  document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
 
   if (tab === 'home') {
     showScene(Scene.HOME);
     return;
   }
-  if (tab === 'shop') {
-    document.getElementById('vpanel-shop').classList.add('active');
-    showShop();
-    return;
+
+  // 마을 씬으로 복귀 (집에서 왔을 수 있으니)
+  if (currentScene === Scene.HOME) {
+    showScene(Scene.VILLAGE);
   }
+
+  document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`vpanel-${tab}`).classList.add('active');
+
+  if (tab === 'shop') showShop();
 }
 
 // ── 강으로 이동 ──

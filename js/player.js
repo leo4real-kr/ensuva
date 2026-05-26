@@ -18,9 +18,14 @@ const gameState = {
   money: 0,
   muted: false,
   bgIndex: 0,
-  hp: 100,      // 체력 (0~100)
+  hp: 100,
   maxHp: 100,
-  sleptToday: false,  // 하루 1회 수면 제한
+  sleptToday: false,
+  // 상점 관련
+  bait: null,
+  fish: [],
+  lineLevel: 0,
+  reelLevel: 0,
 };
 
 // ── 조사 자동 판별 ──
@@ -35,12 +40,12 @@ function josa(name, type) {
     '을를':   hasBatchim ? '을' : '를',
     '과와':   hasBatchim ? '과' : '와',
     '으로로': hasBatchim ? '으로' : '로',
-    '이':     hasBatchim ? '이' : '',    // 호격 '이' (건우야 vs 민준이야)
+    '이':     hasBatchim ? '이' : '',
   };
   return name + (map[type] ?? '');
 }
 
-// 태그 치환 (조사 포함)
+// ── 태그 치환 ──
 function tag(t) {
   return t
     .replace(/\[NAME\]/g,  player.fullName)
@@ -48,36 +53,51 @@ function tag(t) {
     .replace(/\[LAST\]/g,  player.lastName)
     .replace(/\[NICK1\]/g, player.nickname1)
     .replace(/\[NICK2\]/g, player.nickname2)
-    // 조사 태그: [FIRST:아야] → 건우야 / 민준아
     .replace(/\[FIRST:([가-힣a-z]+)\]/g, (_, type) => josa(player.firstName, type))
     .replace(/\[NAME:([가-힣a-z]+)\]/g,  (_, type) => josa(player.fullName,  type))
     .replace(/\[NICK1:([가-힣a-z]+)\]/g, (_, type) => josa(player.nickname1, type))
     .replace(/\[NICK2:([가-힣a-z]+)\]/g, (_, type) => josa(player.nickname2, type));
 }
 
-// localStorage 저장/불러오기
+// ── localStorage 저장/불러오기 ──
 function saveGame() {
   localStorage.setItem('msv_player', JSON.stringify({
-    gender: player.gender,
-    lastName: player.lastName,
+    gender:    player.gender,
+    lastName:  player.lastName,
     firstName: player.firstName,
     nickname1: player.nickname1,
     nickname2: player.nickname2,
   }));
   localStorage.setItem('msv_state', JSON.stringify({
-    day: gameState.day,
-    hour: gameState.hour,
-    minute: gameState.minute,
-    money: gameState.money,
-    hp: gameState.hp,
+    day:        gameState.day,
+    hour:       gameState.hour,
+    minute:     gameState.minute,
+    money:      gameState.money,
+    hp:         gameState.hp,
     sleptToday: gameState.sleptToday,
+    bait:       gameState.bait,
+    fish:       gameState.fish,
+    lineLevel:  gameState.lineLevel,
+    reelLevel:  gameState.reelLevel,
   }));
 }
+
+// ── 낚시 도감 (전역) ──
+const fishingLog = {};
 
 function loadGame() {
   const p = localStorage.getItem('msv_player');
   const s = localStorage.getItem('msv_state');
   if (p) Object.assign(player, JSON.parse(p));
-  if (s) Object.assign(gameState, JSON.parse(s));
+  if (s) {
+    const parsed = JSON.parse(s);
+    Object.assign(gameState, parsed);
+    // 누락 필드 기본값 보장
+    if (!gameState.fish)      gameState.fish      = [];
+    if (!gameState.lineLevel) gameState.lineLevel = 0;
+    if (!gameState.reelLevel) gameState.reelLevel = 0;
+    if (!gameState.hp)        gameState.hp        = 100;
+    if (!gameState.maxHp)     gameState.maxHp     = 100;
+  }
   return !!(p && s);
 }

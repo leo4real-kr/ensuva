@@ -56,25 +56,25 @@ const rhythm = {
 // decayRate: 프레임당 게이지 감소량
 const fishDB = [
   { name:'피라미', rarity:'common', emoji:'🐠', weight:[20,100],   price:300,
-    pattern:{ zones:3, size:0.70, speed:0.014, hits:2, maxMiss:3,
+    pattern:{ zones:3, size:0.70, speed:0.014, hits:2, maxMiss:5,
               tapBoost:0.32, decayRate:0.0001 } },
   { name:'붕어',   rarity:'common', emoji:'🐟', weight:[100,400],  price:500,
-    pattern:{ zones:2, size:0.44, speed:0.022, hits:3, maxMiss:3,
+    pattern:{ zones:2, size:0.44, speed:0.022, hits:3, maxMiss:4,
               tapBoost:0.22, decayRate:0.0003 } },
   { name:'쏘가리', rarity:'rare',   emoji:'🐡', weight:[200,800],  price:1200,
-    pattern:{ zones:2, size:0.30, speed:0.034, hits:4, maxMiss:2,
+    pattern:{ zones:2, size:0.30, speed:0.034, hits:4, maxMiss:3,
               tapBoost:0.18, decayRate:0.0004 } },
   { name:'메기',   rarity:'rare',   emoji:'🐟', weight:[300,1500], price:1500,
-    pattern:{ zones:3, size:0.32, speed:0.028, hits:5, maxMiss:2,
+    pattern:{ zones:3, size:0.32, speed:0.028, hits:5, maxMiss:3,
               tapBoost:0.16, decayRate:0.0004 } },
   { name:'가물치', rarity:'epic',   emoji:'🐍', weight:[500,3000], price:5000,
-    pattern:{ zones:4, size:0.22, speed:0.040, hits:7, maxMiss:1,
+    pattern:{ zones:4, size:0.22, speed:0.040, hits:7, maxMiss:2,
               tapBoost:0.12, decayRate:0.0005 } },
 ];
 
 let currentFish = null;
 let fishWeight  = 0;
-const fishingLog = {};
+// fishingLog는 player.js에서 전역 선언됨
 
 // ── 캔버스 초기화 ──
 function initFishingCanvas() {

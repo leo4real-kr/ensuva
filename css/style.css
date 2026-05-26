@@ -1358,3 +1358,24 @@ body {
   color: var(--text-dim);
   letter-spacing: 0.05em;
 }
+
+/* ── 오프닝 건너뛰기 버튼 ── */
+.skip-opening {
+  position: absolute;
+  bottom: max(110px, calc(env(safe-area-inset-bottom,0px) + 110px));
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(12px, 2vw, 15px);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: rgba(240,228,204,0.35);
+  cursor: pointer;
+  transition: color 0.3s;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(0,0,0,0.8);
+  padding: 8px 16px;
+}
+.skip-opening:hover, .skip-opening:active {
+  color: rgba(240,228,204,0.7);
+}

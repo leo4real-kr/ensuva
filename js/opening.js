@@ -131,13 +131,14 @@ const cuts = [
 ];
 
 let curCut = 0, lineIdx = 0, isTyping = false, typingTimer = null;
+let cutTransitionTimer = null; // showCut setTimeout 추적용
+let cutLocked = false;         // 컷 전환 중 클릭 잠금
 
 function startCutscene() {
   const cs = document.getElementById('o-cutscene');
   cs.classList.add('active');
-  curCut = 0; lineIdx = 0;
+  curCut = 0; lineIdx = 0; cutLocked = false;
 
-  // 오프닝 BGM 시작
   if (!gameState.muted) {
     sounds.bgm.src = 'snd/bgm_opening.mp3';
     sounds.bgm.volume = 0.3;
@@ -149,35 +150,43 @@ function startCutscene() {
 
 function showCut(idx) {
   if (idx >= cuts.length) { endCutscene(); return; }
+  cutLocked = true;
   const cut = cuts[idx]; lineIdx = 0;
   const fade = document.getElementById('cut-fade');
+
+  // 이전 타이머 전부 클리어
+  clearInterval(typingTimer);
+  clearTimeout(cutTransitionTimer);
+  isTyping = false;
+
   fade.classList.add('on');
-  setTimeout(() => {
+  cutTransitionTimer = setTimeout(() => {
     document.querySelectorAll('.cut-img').forEach(i => i.classList.remove('visible'));
-    document.getElementById(cut.img).classList.add('visible');
-    document.getElementById('cut-indicator').textContent = `${String(idx + 1).padStart(2, '0')} / 06`;
+    const imgEl = document.getElementById(cut.img);
+    if (imgEl) imgEl.classList.add('visible');
+    document.getElementById('cut-indicator').textContent =
+      `${String(idx + 1).padStart(2, '0')} / 06`;
     fade.classList.remove('on');
     document.getElementById('cut-text-box').classList.add('visible');
-    setTimeout(() => typeLine(cut.lines[0]), 400);
+    cutTransitionTimer = setTimeout(() => {
+      cutLocked = false;
+      typeLine(cut.lines[0]);
+    }, 400);
   }, 800);
 }
 
-// \n을 <br>로 변환하여 줄바꿈 지원
 function typeLine(text) {
+  clearInterval(typingTimer);
   const el = document.getElementById('cut-narrator');
   text = tag(text);
   isTyping = true;
   el.innerHTML = '';
   let i = 0;
   const cursor = '<span class="typing-cursor"></span>';
-
-  // 줄바꿈 처리: \n → <br> 변환 후 타이핑
   const chars = text.split('');
   typingTimer = setInterval(() => {
     if (i < chars.length) {
-      const current = chars.slice(0, i + 1).join('')
-        .replace(/\n/g, '<br>');
-      el.innerHTML = current + cursor;
+      el.innerHTML = chars.slice(0, i + 1).join('').replace(/\n/g, '<br>') + cursor;
       i++;
     } else {
       el.innerHTML = text.replace(/\n/g, '<br>');
@@ -188,19 +197,54 @@ function typeLine(text) {
 }
 
 function handleCutClick() {
+  // 컷 전환 중엔 무시
+  if (cutLocked) return;
+
   if (isTyping) {
-    clearInterval(typingTimer); isTyping = false;
+    clearInterval(typingTimer);
+    isTyping = false;
     document.getElementById('cut-narrator').innerHTML =
       tag(cuts[curCut].lines[lineIdx]).replace(/\n/g, '<br>');
     return;
   }
   const cut = cuts[curCut];
-  if (lineIdx < cut.lines.length - 1) { lineIdx++; typeLine(cut.lines[lineIdx]); return; }
-  curCut++; showCut(curCut);
+  if (lineIdx < cut.lines.length - 1) {
+    lineIdx++;
+    typeLine(cut.lines[lineIdx]);
+    return;
+  }
+  curCut++;
+  showCut(curCut);
 }
 
+// ── 오프닝 건너뛰기 ──
+function skipOpening() {
+  const ti = document.getElementById('o-title');
+  ti.classList.add('fade-out');
+  setTimeout(() => {
+    ti.style.display = 'none';
+    window._skipCutscene = true;
+    showOScreen('o-gender');
+  }, 1500);
+}
+
+// confirmNickname 오버라이드 - 건너뛰기 모드
+const _origConfirmNickname = confirmNickname;
+confirmNickname = function() {
+  if (window._skipCutscene) {
+    if (!nick1Done || !nick2Done) return;
+    document.querySelectorAll('.o-screen').forEach(s => {
+      s.classList.remove('active'); s.style.display = 'none';
+    });
+    window._skipCutscene = false;
+    saveGame();
+    startGame();
+    return;
+  }
+  _origConfirmNickname();
+};
+
 const cs = document.getElementById('o-cutscene');
-cs.addEventListener('click',    handleCutClick);
 cs.addEventListener('touchend', e => { e.preventDefault(); handleCutClick(); });
 document.addEventListener('keydown', e => {
   if ((e.key === ' ' || e.key === 'Enter') && cs.classList.contains('active')) {

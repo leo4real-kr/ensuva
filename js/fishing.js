@@ -114,7 +114,10 @@ function startFishing() {
   document.getElementById('fishing-result').style.display = 'none';
   document.getElementById('fishing-bottom-btns').style.display = 'none';
   document.getElementById('fishing-ui').style.display = 'flex';
-  setFishingMsg('버튼을 길게 눌러 캐스팅');
+
+  const bait = gameState.bait;
+  const baitMsg = bait ? `${bait.emoji} ${bait.name} ×${bait.count}` : '미끼 없음';
+  setFishingMsg(`버튼을 길게 눌러 캐스팅\n${baitMsg}`);
 }
 
 function showCastBtn() {
@@ -280,12 +283,17 @@ function onStrike() {
     rhythm.zones.push({ start: center - p.size/2, end: center + p.size/2 });
   }
 
-  // 게이지 + 물고기별 파라미터 적용
+  // 게이지 + 물고기별 파라미터 + 업그레이드 효과 적용
+  const lineBonus = gameState.lineLevel || 0;
+  const reelBonus = gameState.reelLevel || 0;
   reeling.gauge     = 0.10;
   reeling.missCount = 0;
-  reeling.maxMiss   = p.maxMiss;
+  reeling.maxMiss   = p.maxMiss + lineBonus;
   reeling.tapBoost  = p.tapBoost;
-  reeling.decayRate = p.decayRate;
+  reeling.decayRate = p.decayRate * (1 - reelBonus * 0.15);
+
+  // 미끼 소모
+  if (typeof consumeBait === 'function') consumeBait();
 
   // UI: 캐스팅 버튼 완전 숨기고 릴링 컨트롤 표시
   hideCastBtn();
@@ -346,8 +354,22 @@ function showTapFeedback(type) {
   tapFeedback.alpha = 1;
 }
 
-// ── 물고기 선택 ──
+// ── 물고기 선택 (미끼 효과 반영) ──
 function selectFish() {
+  const weights = typeof getWeightedFishDB === 'function'
+    ? getWeightedFishDB() : null;
+
+  if (weights) {
+    const total = weights.reduce((s, w) => s + w, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < fishDB.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return fishDB[i];
+    }
+    return fishDB[fishDB.length - 1];
+  }
+
+  // 기본 확률
   const r = Math.random();
   if (r < 0.35) return fishDB[0];
   if (r < 0.65) return fishDB[1];
@@ -376,7 +398,10 @@ function showFishingResult(success, fish, weight) {
   }
 }
 
-function keepFish() { closeFishingResult(`${currentFish?.name}을(를) 보관했다.`); }
+function keepFish() {
+  keepFishToInventory(currentFish, fishWeight);
+  closeFishingResult(`${currentFish?.name}을(를) 보관했다.`);
+}
 function releaseFish() {
   if (currentFish && fishingLog[currentFish.name])
     fishingLog[currentFish.name].released = (fishingLog[currentFish.name].released||0)+1;

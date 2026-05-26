@@ -187,6 +187,9 @@ body {
   width: 100%; height: 100%;
   z-index: 6;
   pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* 낚시 UI 래퍼 */
@@ -225,6 +228,9 @@ body {
 
 /* 캐스팅 버튼 */
 #cast-start-btn {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   width: clamp(110px,24vw,160px);
   height: clamp(110px,24vw,160px);
   border-radius: 50%;
@@ -1123,3 +1129,232 @@ body {
 .hangout-desc   { font-size:clamp(12px,2.2vw,15px); font-weight:300; color:var(--text-sub); letter-spacing:0.1em; text-align:center; }
 .hangout-mono   { font-family:'Noto Serif KR',serif; font-size:clamp(13px,2.5vw,17px); font-weight:300; color:rgba(240,228,204,0.65); letter-spacing:0.05em; text-align:center; line-height:1.9; padding: 0 8px; }
 .hangout-cost   { font-size:clamp(12px,2.2vw,15px); font-weight:300; color:var(--text-dim); letter-spacing:0.1em; }
+
+/* ════════════════════════════════
+   상점 화면
+════════════════════════════════ */
+
+.shop-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(12px, 2.5vh, 20px);
+  width: 100%;
+  max-width: 440px;
+  padding: 0 clamp(14px, 3.5vw, 24px);
+  pointer-events: all;
+}
+
+/* 상점 헤더 */
+.shop-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: clamp(10px, 2vh, 16px);
+  border-bottom: 1px solid rgba(122,90,48,0.2);
+  width: 100%;
+}
+.shop-npc {
+  font-size: clamp(15px, 3vw, 19px);
+  font-weight: 300;
+  color: var(--amber-light);
+  letter-spacing: 0.1em;
+}
+.shop-greeting {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(13px, 2.5vw, 16px);
+  font-weight: 300;
+  color: rgba(240,228,204,0.55);
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.shop-money {
+  font-size: clamp(16px, 3vw, 20px);
+  font-weight: 300;
+  color: var(--amber-light);
+  letter-spacing: 0.05em;
+}
+
+/* 탭 */
+.shop-tabs {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.shop-tab-btn {
+  flex: 1;
+  padding: clamp(8px, 1.5vh, 12px) 8px;
+  background: transparent;
+  border: 1px solid rgba(122,90,48,0.2);
+  color: var(--text-dim);
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(12px, 2.2vw, 15px);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.shop-tab-btn.active {
+  border-color: var(--amber);
+  color: var(--amber-light);
+  background: rgba(200,146,42,0.08);
+}
+
+/* 컨텐츠 */
+.shop-content {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.5vh, 12px);
+  width: 100%;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.shop-section-label {
+  font-size: clamp(11px, 1.8vw, 14px);
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  color: var(--text-dim);
+  padding-bottom: 4px;
+}
+
+/* 아이템 행 */
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 16px);
+  padding: clamp(10px, 2vh, 16px) clamp(12px, 2.5vw, 18px);
+  background: rgba(10,8,4,0.45);
+  border: 1px solid rgba(122,90,48,0.15);
+  transition: border-color 0.2s;
+}
+.shop-item.equipped {
+  border-color: rgba(200,146,42,0.35);
+  background: rgba(200,146,42,0.06);
+}
+.shop-item-emoji { font-size: clamp(22px, 4.5vw, 30px); flex-shrink: 0; }
+.shop-item-info  { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.shop-item-name  {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(14px, 2.8vw, 17px);
+  font-weight: 300;
+  color: var(--cream);
+  letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.shop-item-desc {
+  font-size: clamp(10px, 1.8vw, 13px);
+  font-weight: 300;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+.shop-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.shop-item-price {
+  font-size: clamp(12px, 2vw, 15px);
+  font-weight: 300;
+  color: var(--amber-light);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* 구매/강화 버튼 */
+.shop-buy-btn {
+  padding: clamp(5px, 1vh, 8px) clamp(10px, 2vw, 16px);
+  background: transparent;
+  border: 1px solid rgba(122,90,48,0.3);
+  color: var(--text-sub);
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(11px, 1.8vw, 14px);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.shop-buy-btn:hover, .shop-buy-btn:active {
+  border-color: var(--amber);
+  color: var(--amber-light);
+  background: rgba(200,146,42,0.08);
+}
+.shop-buy-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 배지 */
+.equipped-badge {
+  font-size: clamp(10px, 1.6vw, 12px);
+  color: var(--amber);
+  letter-spacing: 0.05em;
+}
+.level-badge {
+  font-size: clamp(10px, 1.6vw, 12px);
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* 전체 판매 버튼 */
+.shop-sell-all-btn {
+  width: 100%;
+  padding: clamp(12px, 2.5vh, 18px);
+  background: rgba(200,146,42,0.1);
+  border: 1px solid rgba(200,146,42,0.35);
+  color: var(--amber-light);
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(13px, 2.5vw, 16px);
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+.shop-sell-all-btn:hover, .shop-sell-all-btn:active {
+  background: rgba(200,146,42,0.2);
+}
+
+/* 빈 상태 */
+.shop-empty {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(13px, 2.5vw, 16px);
+  font-weight: 300;
+  color: var(--text-dim);
+  text-align: center;
+  padding: clamp(20px, 4vh, 32px) 0;
+  letter-spacing: 0.1em;
+  line-height: 2;
+}
+
+/* 업그레이드 스탯 */
+.shop-upgrade-info {
+  width: 100%;
+  padding: clamp(10px, 2vh, 16px);
+  background: rgba(10,8,4,0.4);
+  border: 1px solid rgba(122,90,48,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.upgrade-stat {
+  font-size: clamp(11px, 1.8vw, 14px);
+  font-weight: 300;
+  color: var(--text-sub);
+  letter-spacing: 0.08em;
+}
+
+/* 현재 미끼 HUD 표시 */
+#bait-indicator {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(10px, 1.6vw, 13px);
+  font-weight: 300;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}

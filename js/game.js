@@ -275,9 +275,13 @@ function setVillageTab(tab, e) {
   if (e && e.currentTarget) e.currentTarget.classList.add('active');
   document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
 
-  // 집 탭은 별도 씬으로
   if (tab === 'home') {
     showScene(Scene.HOME);
+    return;
+  }
+  if (tab === 'shop') {
+    document.getElementById('vpanel-shop').classList.add('active');
+    showShop();
     return;
   }
   document.getElementById(`vpanel-${tab}`).classList.add('active');

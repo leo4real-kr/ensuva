@@ -111,22 +111,21 @@ function renderBuyTab() {
   const currentBait = gameState.bait;
   return `
     <div class="shop-section-label">미끼</div>
+    <div class="shop-bait-note">미끼 없이도 낚시 가능 · 1회 사용 후 소모</div>
     ${baits.map(b => `
       <div class="shop-item ${currentBait?.id === b.id ? 'equipped' : ''}">
         <span class="shop-item-emoji">${b.emoji}</span>
         <div class="shop-item-info">
           <div class="shop-item-name">${b.name}
             ${currentBait?.id === b.id
-              ? `<span class="equipped-badge">장착중 ×${currentBait.count}</span>`
-              : ''}
+              ? `<span class="equipped-badge">×${currentBait.count}</span>` : ''}
           </div>
           <div class="shop-item-desc">${b.desc}</div>
+          <div class="shop-item-effect">${getBaitEffect(b)}</div>
         </div>
         <div class="shop-item-right">
           <div class="shop-item-price">₩${b.price.toLocaleString()}</div>
-          <button class="shop-buy-btn"
-            onclick="buyBait('${b.id}')"
-            ${gameState.money < b.price ? 'disabled' : ''}>
+          <button class="shop-buy-btn" onclick="buyBait('${b.id}')">
             ${currentBait?.id === b.id ? '+추가' : '구매'}
           </button>
         </div>
@@ -135,17 +134,29 @@ function renderBuyTab() {
   `;
 }
 
+function getBaitEffect(b) {
+  const parts = [];
+  if (b.bonus.common)  parts.push(`일반 어종 확률 ×${b.bonus.common}`);
+  if (b.bonus['붕어'])  parts.push(`붕어 확률 ×${b.bonus['붕어']}`);
+  if (b.bonus['가물치']) parts.push(`가물치 확률 ×${b.bonus['가물치']}`);
+  if (b.bonus['쏘가리']) parts.push(`쏘가리 확률 ×${b.bonus['쏘가리']}`);
+  if (b.bonus['메기'])  parts.push(`메기 확률 ×${b.bonus['메기']}`);
+  return parts.join(' · ');
+}
+
 function buyBait(id) {
   const bait = baits.find(b => b.id === id);
-  if (!bait || gameState.money < bait.price) return;
+  if (!bait) return;
+  if (gameState.money < bait.price) {
+    showBuyFeedback('돈이 부족하다');
+    return;
+  }
   gameState.money -= bait.price;
-
   if (gameState.bait?.id === id) {
     gameState.bait.count++;
   } else {
     gameState.bait = { ...bait, count: 1 };
   }
-
   updateHUD();
   saveGame();
   showBuyFeedback(`${bait.emoji} ${bait.name} 구매!`);
@@ -217,6 +228,9 @@ function renderUpgradeTab() {
       const level = gameState[`${u.id}Level`] || 0;
       const maxed = level >= u.maxLevel;
       const price = u.price * (level + 1);
+      const nextEffect = u.id === 'line'
+        ? `미스 허용 ${3 + level}회`
+        : `게이지 감소 ${100 - (level+1)*15}%`;
       return `
         <div class="shop-item">
           <span class="shop-item-emoji">${u.emoji}</span>
@@ -225,12 +239,13 @@ function renderUpgradeTab() {
               <span class="level-badge">Lv.${level}/${u.maxLevel}</span>
             </div>
             <div class="shop-item-desc">${u.desc}</div>
+            <div class="shop-item-effect">${maxed ? '최대 강화 완료' : `→ ${nextEffect}`}</div>
           </div>
           <div class="shop-item-right">
             <div class="shop-item-price">${maxed ? 'MAX' : `₩${price.toLocaleString()}`}</div>
             <button class="shop-buy-btn"
               onclick="buyUpgrade('${u.id}')"
-              ${maxed || gameState.money < price ? 'disabled' : ''}>
+              ${maxed ? 'disabled' : ''}>
               ${maxed ? '완료' : '강화'}
             </button>
           </div>
@@ -238,8 +253,8 @@ function renderUpgradeTab() {
       `;
     }).join('')}
     <div class="shop-upgrade-info">
-      <div class="upgrade-stat">낚싯줄 Lv.${gameState.lineLevel||0} — 미스 허용 ${2 + (gameState.lineLevel||0)}회</div>
-      <div class="upgrade-stat">릴 Lv.${gameState.reelLevel||0} — 게이지 감소 ${100 - (gameState.reelLevel||0)*15}%</div>
+      <div class="upgrade-stat">🧵 낚싯줄 — 미스 허용 ${2 + (gameState.lineLevel||0)}회</div>
+      <div class="upgrade-stat">⚙️ 릴 — 게이지 감소 ${100 - (gameState.reelLevel||0)*15}%</div>
     </div>
   `;
 }
@@ -250,7 +265,10 @@ function buyUpgrade(id) {
   const level = gameState[`${id}Level`] || 0;
   if (level >= upg.maxLevel) return;
   const price = upg.price * (level + 1);
-  if (gameState.money < price) return;
+  if (gameState.money < price) {
+    showBuyFeedback('돈이 부족하다');
+    return;
+  }
   gameState.money -= price;
   upg.apply();
   updateHUD();
@@ -308,3 +326,28 @@ function consumeBait() {
   }
   saveGame();
 }
+
+// ════════════════════════════════
+// 친밀도 / 선악 시스템 (TODO)
+// ════════════════════════════════
+//
+// gameState.affinity  : 0~100 (최순이 할머니 친밀도)
+// gameState.karma     : -100~100 (선악 판정)
+//
+// 친밀도 획득:
+//   - 물고기 방생 ★ → +2
+//   - 할머니 대화 → +1
+//   - 상점 구매 → +1
+//   - 매일 상점 방문 → +1
+//
+// 카르마 획득:
+//   - 방생 → +2
+//   - 희귀 어종 방생 → +5
+//   - 판매 → 0 (중립)
+//
+// 효과:
+//   - 친밀도 30+  : 구매 5% 할인
+//   - 친밀도 60+  : 구매 10% 할인, 판매 10% 할증
+//   - 친밀도 100  : 구매 15% 할인, 판매 15% 할증
+//   - 카르마 +50+ : 판매 추가 5% 할증
+//   - 카르마 -50- : 구매 5% 할증 (불이익)

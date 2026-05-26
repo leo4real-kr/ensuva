@@ -218,6 +218,12 @@ function showScene(scene) {
       startBgLoop('village');
       switchBGM('snd/bgm_main.mp3');
       setRiverSound(false);
+      // 마을 진입 시 기본 탭(상점)으로 초기화
+      document.querySelectorAll('.village-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.village-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('.village-tab')?.classList.add('active');
+      document.getElementById('vpanel-shop').classList.add('active');
+      if (typeof showShop === 'function') showShop();
       break;
 
     case Scene.RIVER_SELECT:

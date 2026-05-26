@@ -1379,3 +1379,51 @@ body {
 .skip-opening:hover, .skip-opening:active {
   color: rgba(240,228,204,0.7);
 }
+
+/* ── 상점 텍스트 가시성 개선 ── */
+.shop-item-name  { color: #f0e4cc !important; }
+.shop-item-desc  { color: #a89878 !important; }
+.shop-item-effect {
+  font-size: clamp(10px, 1.8vw, 13px);
+  font-weight: 300;
+  color: #80c860;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+.shop-item-price { color: #e8b84b !important; }
+.shop-section-label { color: #6a5a48 !important; }
+.shop-greeting   { color: #c8b898 !important; }
+.shop-npc        { color: #e8b84b !important; }
+.shop-money      { color: #e8b84b !important; font-size: clamp(18px,3.5vw,22px) !important; }
+.upgrade-stat    { color: #a89878 !important; }
+.level-badge     { color: #8a7458 !important; }
+.equipped-badge  { color: #e8b84b !important; }
+.shop-tab-btn         { color: #8a7458 !important; }
+.shop-tab-btn.active  { color: #e8b84b !important; }
+.shop-buy-btn    { color: #a89878 !important; }
+.shop-buy-btn:hover, .shop-buy-btn:active { color: #f0e4cc !important; }
+.journal-name    { color: #f0e4cc !important; }
+.journal-detail  { color: #8a7458 !important; }
+.journal-empty   { color: #6a5a48 !important; }
+.shop-empty      { color: #8a7458 !important; }
+.shop-bait-note  {
+  font-size: clamp(10px, 1.8vw, 13px);
+  font-weight: 300;
+  color: #6a5a48;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+/* 홈 텍스트 가시성 */
+.home-btn-label  { color: #f0e4cc !important; }
+.home-btn-desc   { color: #8a7458 !important; }
+.home-day        { color: #6a5a48 !important; }
+.home-clock      { color: #f0e4cc !important; }
+.home-money      { color: #e8b84b !important; }
+.sleep-day       { color: #6a5a48 !important; }
+.sleep-time      { color: #f0e4cc !important; }
+.sleep-monologue { color: #c8b898 !important; }
+.hangout-title   { color: #f0e4cc !important; }
+.hangout-desc    { color: #a89878 !important; }
+.hangout-mono    { color: #c8b898 !important; }
+.hangout-cost    { color: #8a7458 !important; }
